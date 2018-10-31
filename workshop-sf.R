@@ -15,6 +15,8 @@ shp_dir <- glue("{in_dir}/shapefiles")
 #RM zonas censales
 data_geo_RM <- glue("{shp_dir}/R13_Santiago") %>% 
   st_read()  %>%
+  # Sistema coordenadas UTM zone 19S
+  st_transform(24879) %>% 
   rename_all(tolower) %>% 
   mutate(
     geocode = as.character(geocodigo),
@@ -26,6 +28,8 @@ data_geo_RM <- glue("{shp_dir}/R13_Santiago") %>%
 
 metro_stgo <- glue("{shp_dir}/Estaciones_Metro_Santiago") %>% 
   st_read()  %>%
+  # Sistema coordenadas UTM zone 19S
+  st_transform(24879) %>% 
   rename_all(tolower) %>% 
   # Filtrar linea 3 - solo estaciones existentes
   filter(linea != "Linea 3") %>% 
@@ -86,7 +90,13 @@ mapa_base +
   geom_sf(data = buf_tot, color = "red")
 
 #Seleccionar ZC dentro del buffer
+zc_buf_join <- st_join(data_geo_RM, buf_tot)
 
+# subsetting
+zc_sel_buf <- as(zc_buf_join, "Spatial")
+
+ggplot() +
+  geom_sf(data = zc_sel_buf)
 
 # Agregar datos escolaridad
   
