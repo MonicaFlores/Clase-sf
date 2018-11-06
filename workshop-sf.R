@@ -127,10 +127,15 @@ mapa_base +
 
 # Agregar datos a nivel espacial------------------------------------
 
-
 # Agregar datos escolaridad
-  
+escolaridad_media <- read.csv2(glue("{out_dir}/escolaridad_media_zc.csv")) %>% 
+  mutate(
+    geocode = as.character(geocode)
+  )
+
 # Plotear mapa con color por promedio anios escolaridad
+
+
   
 # Plotear promedio anios escolaridad dentro del buffer metro
   
@@ -148,4 +153,6 @@ area_ha <- area %>% units::set_units(ha)
 area_ha
 ## Agregarlo como variable
 data_geo_RM$area_ha <- as.numeric(area_ha)
+
+# Prueba 
   
