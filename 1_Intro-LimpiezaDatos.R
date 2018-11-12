@@ -1,9 +1,24 @@
-# Introduccion a R - Limpieza de datos con Dyplr parte de Tidyverse
+# Nombre Programa:  1_Intro_LimpiezaDatos.R
+# Ubicacion:      	GitHub/Clase-sf
+# Autor:        	  Monica Flores
+# Fecha Creacion:   05/11/2018
+# Proyecto:         Workshop Analisis Datos Espaciales 
+# Objetivo:    	    Explorar herramientas de analisis y limpieza de datos
+# Notas:
+
+# Instalar paquete y libreria tidyverse - descomentar install.packages quien no lo tenga instalado
+
+# install.packages (c("tidyverse", "glue", "sf"))
+library(tidyverse) # Limpieza y visualizacion de datos (dplyr + stringr + ggplot2 + tidyr + readr + purrr)
+library(glue)      # Pegar texto desde variables
+library(sf)        # Simple Feautures: manipular datos vectoriales espaciales
+
+# Introduccion a R y Limpieza de datos con Dplyr  -------------------------
 
 # Correr comandos: seleccionar + ctrl + enter
 2 + 2 
 
-# Asignar información a una variable
+# Asignar informacion a una variable
 cuatro <- 2 + 2
 cuatro
 
@@ -64,20 +79,20 @@ df %>% group_by(mi_vector5) %>%
 
 
 # Analisis de datos Censo 2017 a nivel de zona censal ---------------------
-## Obtener un promedio de anios de escolaridad por Zona Censal
 
-# install.packages (c("tidyverse","glue", "sf"))
-library(tidyverse)
-library(glue)
-library(sf)
+# Obtener un promedio de años de escolaridad por Zona Censal
 
-#Asignar ubicacion directorios a variables
-out_dir <- "C:/Users/CEDEUS 18/Documents/CEDEUS/Monica - 2018/05_WorkshopR/Output"
-in_dir  <- "C:/Users/CEDEUS 18/Documents/CEDEUS/Monica - 2018/05_WorkshopR/Input"
+# Setear directorio local - Cambiar el nombre a la ubicacion de la carpeta de trabajo personal
+dir_loc <- "C:/Users/CEDEUS 18/Documents/CEDEUS/Monica - 2018/05_WorkshopR"
+# dir_loc <- "C:/Users/CEDEUS 18/Desktop/Workshop_R" #Ejemplo si la carpeta esta en el escritorio 
+
+# Asignar ubicacion directorios a variables
+out_dir <- "{dir_loc}/Output"
+in_dir  <- "{dir_loc}/Input"
 shp_dir <- glue("{in_dir}/shapefiles")
 
 # Importar datos como dataframe
-escolaridad_csv <- read.csv2(glue("{in_dir}/Escolaridad_edad25mas.csv")) ## Datos previamente filtrados mayores de 25 años
+escolaridad_csv <- read.csv2(glue("{in_dir}/Escolaridad_edad25mas.csv")) ## Datos previamente filtrados mayores de 25 anos
 
 # Explorar dataset
 head(escolaridad_csv)
@@ -90,15 +105,15 @@ escolaridad <- escolaridad_csv %>%
   ) %>% 
   select(-redcode)
 
-## Los datos estan en formato ancho (wide), cada año de escolaridad es una variable y cada dato el numero de personas
-## Necesitamos transformarlo a formato largo (long) para calcular el promedio de años de escolaridad por ZC
+## Los datos estan en formato ancho (wide), cada ano de escolaridad es una variable y cada dato el numero de personas
+## Necesitamos transformarlo a formato largo (long) para calcular el promedio de anos de escolaridad por ZC
 
 # Transformar a formato largo
 escolaridad_long <- escolaridad %>%  
   gather(escolaridad_0:escolaridad_21,
     key="a_escolaridad", value = "n_personas"
   ) %>%
-  # Extraer el numero de años del nombre de la variable
+  # Extraer el numero de anos del nombre de la variable
   mutate(
     a_escolaridad = str_replace(a_escolaridad, "escolaridad_", ""),
     a_escolaridad = as.numeric(a_escolaridad)
@@ -110,7 +125,7 @@ escolaridad_long <- escolaridad %>%
 head(escolaridad_long)
 str(escolaridad_long)
 
-#Calcular promedio años escolaridad por ZC
+#Calcular promedio anos escolaridad por ZC
 escolaridad_media <- escolaridad_long %>% 
   group_by(geocode) %>% 
   summarise(
@@ -119,8 +134,29 @@ escolaridad_media <- escolaridad_long %>%
   ) %>% 
   # Excluir NAs
   filter(!is.na(a_esc_media))
-  
+
 # Guardar datos en csv
 escolaridad_media %>% write.csv2(glue("{out_dir}/escolaridad_media_zc.csv"), row.names=FALSE)
 
+# Visualizar: Introduccion a ggplot2 --------------------------------------
+
+# Tres partes de ggplot2: data, aesthetics, geometry
+## Data - base de datos
+## Aesthetics: Lo que quieres graficar (variables)
+## Geometry: Como lo quieres graficar (grafico de barras, linea, mapa, etc)
+
+# Plotear histograma
+hist1 <- escolaridad_media %>% 
+  ggplot(aes(a_esc_media)) + 
+  geom_histogram()
+hist1
+
+# Agregar eqtiquetas y modificar colores y tamaños - mismo grafico
+hist2 <- escolaridad_media %>% 
+  ggplot(aes(a_esc_media)) + 
+  geom_histogram(color = "grey", fill = "navy", lwd=0.1, binwidth = 0.05)
+hist2 + labs(x = "Años de Escolaridad Media", y = "Frecuencia",
+              title ="Histograma Escolaridad Promedio",
+              subtitle = "por Zona Censal en el Gran Santiago",
+              caption = NULL)
   
