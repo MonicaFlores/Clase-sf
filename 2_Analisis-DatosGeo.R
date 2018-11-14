@@ -17,8 +17,8 @@ dir_loc <- "C:/Users/CEDEUS 18/Documents/CEDEUS/Monica - 2018/05_WorkshopR"
 # dir_loc <- "C:/Users/CEDEUS 18/Desktop/Workshop_R" #Ejemplo si la carpeta esta en el escritorio 
 
 # Asignar ubicacion directorios a variables
-out_dir <- "{dir_loc}/Output"
-in_dir  <- "{dir_loc}/Input"
+out_dir <- glue("{dir_loc}/Output")
+in_dir  <- glue("{dir_loc}/Input")
 shp_dir <- glue("{in_dir}/shapefiles")
 
 # Leer Datos escolaridad limpios - los ocuparemos al final del script
@@ -115,7 +115,7 @@ ggplot() +
   geom_sf(data = buf_inters)
 # Plotear intersection arroja los atributos (ZC) cortados - como seleccionar el atributo completo?
 
-## Seleccionar solo geocodigo y hacerlo dataframe para que pierda atributos de geometrC-a
+## Seleccionar solo geocodigo y hacerlo dataframe para que pierda atributos de geometria
 zc_buf <- as.data.frame(buf_inters) %>% select(geocode) 
 ## Unirlo con el shapefile original ZC - inner join
 data_RM_buf <- data_geo_RM %>% inner_join(zc_buf, by = "geocode")
@@ -126,7 +126,7 @@ ggplot() +
   geom_sf(data = buf_tot, color = "red" , alpha = .5)
 # Funciona e incluye todas las ZC que intersectan el buffer
 
-#------------- Metodo 2: seleccionar solo las ZC cuyto centroide esta dentro del buffer
+#------------- Metodo 2: seleccionar solo las ZC cuyo centroide esta dentro del buffer
 
 ## Covertir poligonos a puntos - centroide 
 zc_centr <- st_centroid(data_geo_RM)
@@ -182,7 +182,7 @@ data_geo_RM$area_ha <- as.numeric(area_ha)
 ## Extraer poligonos que NO estan en el buffer
 not_buf_metro <- data_geo_RM  %>% anti_join(buf_zc_metro, by="geocode")
 
-## Juntar bases de datos con un identifiador dentro/fuera buffer
+## Juntar bases de datos con un identificador dentro/fuera buffer
 total_zc <- buf_zc_metro %>% bind_rows(not_buf_metro, .id = "buffer") %>% 
   mutate(buffer=if_else(buffer==1, "Dentro buffer", "Fuera buffer")) # 1 dentro buffer, 0 fuera buffer
 
@@ -199,16 +199,16 @@ a <- buf_zc_metro %>%
   ggplot(aes(a_esc_media)) + 
   geom_histogram(color = "grey", fill = "navy", lwd=0.1, binwidth = 0.05) +
   labs( x = "Escolaridad Media", y = "Frecuencia",
-        title ="Escolaridad SegC:n CercanC-a al Metro",
-        subtitle = "Zonas Censales a menos de 800m de una EstaciC3n de Metro",
+        title ="Escolaridad Según Cercanía al Metro",
+        subtitle = "Zonas Censales a menos de 800m de una Estación de Metro",
         caption = NULL) 
 
 b <- not_buf_metro %>% 
   ggplot(aes(a_esc_media)) + 
   geom_histogram(color = "grey", fill= "forestgreen",  lwd=0.1, binwidth = 0.05) +
   labs( x = "Escolaridad Media", y = "Frecuencia",
-        title ="Escolaridad SegC:n CercanC-a al Metro",
-        subtitle = "Zonas Censales a mC!s de 800m de una EstaciC3n de Metro",
+        title ="Escolaridad Según Cercanía al Metro",
+        subtitle = "Zonas Censales a más de 800m de una Estación de Metro",
         caption = NULL) 
 
 #Plotear histogramas en la misma lamina
@@ -225,11 +225,10 @@ d <- total_zc %>%
   ggplot(aes(a_esc_media, color = buffer)) + 
   geom_density() + 
   labs( x = "Escolaridad Media", y = "Densidad de Probabilidad",
-        title ="Escolaridad SegC:n CercanC-a al Metro",
-        subtitle = "Distribucion Continua de Escolaridad Promedio\npor Zonas Censales y su Ubicacion Respecto al Metro",
+        title ="Escolaridad Según Cercanía al Metro",
+        subtitle = "Distribución Continua de Escolaridad Promedio\npor Zonas Censales y su Ubicación Respecto al Metro",
         caption = NULL,
         color = "Buffer 800m") +
-  guides(fill=guide_legend(title="New Legend Title"))
   scale_y_continuous(labels = scales::percent)
 d  
 
