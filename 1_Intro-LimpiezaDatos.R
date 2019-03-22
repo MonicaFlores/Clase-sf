@@ -9,6 +9,7 @@
 # Instalar paquete y libreria tidyverse - descomentar install.packages quien no lo tenga instalado
 
 # install.packages (c("tidyverse", "glue", "sf"))
+
 library(tidyverse) # Limpieza y visualizacion de datos (dplyr + stringr + ggplot2 + tidyr + readr + purrr)
 library(glue)      # Pegar texto desde variables
 library(sf)        # Simple Feautures: manipular datos vectoriales espaciales
